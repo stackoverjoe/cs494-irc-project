@@ -1,4 +1,33 @@
 <html>
+  <style>
+    .myMessage {
+      margin: 5px;
+      align-self: flex-start;
+      min-height: 7vh;
+      min-width: 20vw;
+      border-style: solid;
+      border-color: black;
+      border-width: 1px;
+      border-radius: 3px;
+      justify-content: center;
+    }
+    .receivedMessage {
+      margin: 5px;
+      align-self: flex-end;
+      min-height: 7vh;
+      min-width: 20vw;
+      border-style: solid;
+      border-color: black;
+      border-width: 1px;
+      border-radius: 3px;
+    }
+
+    .messageText {
+      position: relative;
+      top: 20%;
+      left: 5%;
+    }
+  </style>
   <head>
     <link
       rel="stylesheet"
@@ -8,12 +37,30 @@
     />
   </head>
   <body>
-      <div class="container">
-          <div style="width: 80vw; height: 70vh; border-width: 1px; border-color: grey; border-style: solid; border-radius: 5px; margin-top: 3vh">
-
-          </div>
-
+    <div class="container">
+      <div
+        id="Chatbox"
+        style="
+          display: flex;
+          flex-direction: column;
+          width: 80vw;
+          height: 70vh;
+          border-width: 1px;
+          border-color: grey;
+          border-style: solid;
+          border-radius: 5px;
+          margin-top: 3vh;
+          overflow: scroll;
+        "
+      >
+        <div class="myMessage">
+          <div class="messageText">Hey hey hey</div>
+        </div>
+        <div class="receivedMessage">
+          <div class="messageText">Hey hey hey</div>
+        </div>
       </div>
+    </div>
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
