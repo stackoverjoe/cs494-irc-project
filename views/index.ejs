@@ -1,5 +1,61 @@
 <html>
   <style>
+    body {
+      background-color: rgb(192, 190, 190)!important;
+    }
+    .container {
+      border: 2px solid #dedede;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+      padding: 10px;
+      margin: 10px 0;
+    }
+
+    .mainContainer {
+      border: 1px solid lightgray;
+      border-radius: 3px;
+      min-height: 40vh;
+    }
+    /* Darker chat container */
+    .darker {
+      border-color: #ccc;
+      background-color: #ddd;
+    }
+
+    /* Clear floats */
+    .container::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+
+    /* Style images */
+    .container img {
+      float: left;
+      max-width: 60px;
+      width: 100%;
+      margin-right: 20px;
+      border-radius: 50%;
+    }
+
+    /* Style the right image */
+    .container img.right {
+      float: right;
+      margin-left: 20px;
+      margin-right: 0;
+    }
+
+    /* Style time text */
+    .time-right {
+      float: right;
+      color: #aaa;
+    }
+
+    /* Style time text */
+    .time-left {
+      float: left;
+      color: #999;
+    }
     .myMessage {
       margin: 5px;
       align-self: flex-start;
@@ -35,9 +91,69 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
   </head>
   <body>
-    <div class="container">
+    <div class="container-fluid row">
+      <div class="container col-lg-4">
+        <div style="font-size: large; font-weight: 500">Online Users</div>
+      </div>
+      <div
+        class="container mainContainer col-lg-7"
+        style="width: 50% !important"
+      >
+        <div style="font-size: large; font-weight: 500">Room Id: 192LK8</div>
+        <div id="chatBox" style="overflow-y: scroll; height: 83%">
+          <div class="container">
+            <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
+            <p>Hello. How are you today?</p>
+            <span class="time-right">11:00</span>
+          </div>
+
+          <div class="container darker">
+            <!-- <img src="/w3images/avatar_g2.jpg" alt="Avatar" class="right" /> -->
+            <p>Hey! I'm fine. Thanks for asking!</p>
+            <span class="time-left">11:01</span>
+          </div>
+
+          <div class="container">
+            <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
+            <p>Sweet! So, what do you wanna do today?</p>
+            <span class="time-right">11:02</span>
+          </div>
+
+          <div class="container darker">
+            <!-- <img src="/w3images/avatar_g2.jpg" alt="Avatar" class="right" /> -->
+            <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
+            <span class="time-left">11:05</span>
+          </div>
+
+        </div>
+        <div
+          style="
+            display: flex;
+            padding: 0px;
+            border: 1px solid lightgray;
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+          "
+        >
+          <textarea style="resize: none; flex: 11"></textarea>
+          <i
+            class="fas fa-location-arrow"
+            style="
+              color: darkgrey;
+              font-size: 36px;
+              flex: 1;
+              align-self: center;
+              text-align: center;
+            "
+          ></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- <div class="container">
       <div
         id="Chatbox"
         style="
@@ -60,7 +176,7 @@
           <div class="messageText">Hey hey hey</div>
         </div>
       </div>
-    </div>
+    </div> -->
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
