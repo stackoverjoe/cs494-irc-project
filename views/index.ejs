@@ -1,7 +1,7 @@
 <html>
   <style>
     body {
-      background-color: rgb(192, 190, 190)!important;
+      background-color: rgb(192, 190, 190) !important;
     }
     .container {
       border: 2px solid #dedede;
@@ -96,7 +96,16 @@
   <body>
     <div class="container-fluid row">
       <div class="container col-lg-4">
-        <div style="font-size: large; font-weight: 500">Online Users</div>
+        <div style="display: flex; flex-direction: row;">
+          <div id="onlineUsers" style="font-size: large; font-weight: 500; border-right: 2px solid black; padding-right: 5px; margin-right: 5px">Online Users</div>
+          <div id="rooms" style="font-size: large; font-weight: 500">Rooms</div>
+        </div>
+        <div id="infoArea">
+          <div id="onlineUser" style="display: flex; justify-content: start;" class="container">
+            <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
+            <div styler="align-items: center">CoolUser513</div>
+          </div>
+        </div>
       </div>
       <div
         class="container mainContainer col-lg-7"
@@ -127,7 +136,6 @@
             <p>Nah, I dunno. Play soccer.. or learn more coding perhaps?</p>
             <span class="time-left">11:05</span>
           </div>
-
         </div>
         <div
           style="
