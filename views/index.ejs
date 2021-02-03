@@ -96,14 +96,32 @@
   <body>
     <div class="container-fluid row">
       <div class="container col-lg-4">
-        <div style="display: flex; flex-direction: row;">
-          <div id="onlineUsers" style="font-size: large; font-weight: 500; border-right: 2px solid black; padding-right: 5px; margin-right: 5px">Online Users</div>
-          <div id="rooms" style="font-size: large; font-weight: 500">Rooms</div>
+        <div style="display: flex; flex-direction: row">
+          <div
+            id="onlineUsers"
+            style="
+              font-size: large;
+              font-weight: 500;
+              border-right: 2px solid black;
+              padding-right: 5px;
+              margin-right: 5px;
+              cursor: pointer;
+            "
+          >
+            Online Users
+          </div>
+          <div id="rooms" style="font-size: large; font-weight: 500; cursor: pointer">Rooms</div>
         </div>
-        <div id="infoArea">
-          <div id="onlineUser" style="display: flex; justify-content: start;" class="container">
+        <div id="userList">
+          <div style="display: flex; justify-content: start;" class="container">
             <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
             <div styler="align-items: center">CoolUser513</div>
+          </div>
+        </div>
+        <div id="roomList" style="display: none">
+          <div style="display: flex; justify-content: start" class="container">
+            <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
+            <div styler="align-items: center">CoolRoom</div>
           </div>
         </div>
       </div>
@@ -111,7 +129,7 @@
         class="container mainContainer col-lg-7"
         style="width: 50% !important"
       >
-        <div style="font-size: large; font-weight: 500">Room Id: 192LK8</div>
+        <div id="roomName" style="font-size: large; font-weight: 500">Room Id: 192LK8</div>
         <div id="chatBox" style="overflow-y: scroll; height: 83%">
           <div class="container">
             <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
@@ -146,7 +164,7 @@
             border-bottom-right-radius: 4px;
           "
         >
-          <textarea style="resize: none; flex: 11"></textarea>
+          <textarea id="messageBox" style="resize: none; flex: 11"></textarea>
           <i
             class="fas fa-location-arrow"
             style="
