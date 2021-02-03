@@ -34,6 +34,7 @@ io.on("connection", (socket) => {
   //Give user a random username
   myUserName = socket.username = "User" + Math.floor(Math.random() * 2000 + 1);
   users.push({username: socket.username});
+  roomsArray.push({sid: socket.id, username: socket.username})
 
   //Init browser local values for self identification/persistence
   socket.emit("newUserInit", {name: socket.username, sid: socket.id})
@@ -42,9 +43,10 @@ io.on("connection", (socket) => {
     users: users,
   });
 
-//   io.sockets.emit("updateRooms", {
-//       all: room
-//   })
+  io.sockets.emit("updateRooms", {
+      all: roomsArray
+  })
+
   socket.on("whoAmI", () => {
     socket.emit("whoAmI", { name: socket.username });
   });
@@ -53,10 +55,13 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log(`${userId} had disconnected from the server.`);
     rooms.delete(userId);
-    console.log(socket.username)
     users = users.filter((name) => name.username !== socket.username);
+    roomsArray = roomsArray.filter((room) => room.sid !== socket.id)
     io.sockets.emit("removeUser", {
       name: socket.username,
     });
+    io.sockets.emit("removeRoom", {
+        roomId: socket.id
+    })
   });
 });
