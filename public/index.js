@@ -1,4 +1,5 @@
 $(document).ready(function () {
+
   let friendlyRoomName = new Map();
   var socket = io.connect("http://localhost:4000", {
     reconnection: false,
@@ -9,6 +10,7 @@ $(document).ready(function () {
   });
 
   let localUsername;
+  let createdRoom = false;
   let currentRoom;
 
   let userList;
@@ -19,21 +21,48 @@ $(document).ready(function () {
   let roomsButton = $("#rooms");
   let roomsOnline = $("#roomList");
   let selectedRoom = $("#roomName");
+  let roomers = $("#theRooms")
+  let createRoom = $("#createRoomButton")
 
   socket.on("newUserInit", (data) => {
     selectedRoom.text(`Room Id: ${data.sid} (Your room)`);
     localUsername = data.name;
   });
 
-  userButton.click((click) => {
+  userButton.click(() => {
     roomsOnline.css("display", "none");
     onlineUsers.css("display", "");
   });
 
-  roomsButton.click((click) => {
+  roomsButton.click(() => {
     onlineUsers.css("display", "none");
     roomsOnline.css("display", "");
   });
+
+  createRoom.click(() => {
+    let roomName = $("#roomToCreate").val()
+    socket.emit("createRoom", {
+      sid: socket.id,
+      roomName: roomName,
+      name: localUsername
+    })
+    console.log(roomName)
+    $("#createRoomModal").modal("hide")
+  })
+
+  socket.on("joinedRoomStatus", data => {
+    if(data.status === "joined"){
+      $(`#join${data.roomJoined}`).replaceWith(
+        `<button id='leave${data.roomJoined}' style='margin-left: auto' type='button' class='btn btn-danger btn-xs roomJoins'>Leave</button>`
+      )
+      $(`#leave${data.roomJoined}`).click((e) => {
+        console.log(e.target.id.substring(5))
+      })
+    }
+    else if(data.status === "left"){
+
+    }
+  })
 
   messageBox.keydown((key) => {
     if (key.keyCode === 13) {
@@ -64,13 +93,25 @@ $(document).ready(function () {
     roomList = rooms.all.map((room) => {
       return `<div id=room${room.sid} style="display: flex; justify-content: start; align-items: center" class="container">
       <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
-      <div style="align-items: center">${room.username}'s room ${localUsername === room.username ? "(your room)" : ""}</div>
+      <div style="align-items: center">${room.roomName} - ${localUsername === room.username ? "(your room)" : `Host: ${room.username}`}</div>
       ${localUsername !== room.username ?
-      `<button id='join${room.sid}' style='margin-left: auto' type='button' class='btn btn-secondary btn-xs'>Join</button>` : ""}
+      `<button id='join${room.roomName}' style='margin-left: auto' type='button' class='btn btn-secondary btn-xs roomJoins'>Join</button>` : ""}
+      ${localUsername === room.username ?
+      `<button id='destroy${room.roomName}' style='margin-left: auto' type='button' class='btn btn-secondary btn-xs roomJoins'>Delete</button>` : ""}
     </div>`;
     });
-    roomsOnline.html(roomList);
+    roomers.html(roomList);
+      $("[id^=join]").click((e)=>{
+        room = e.target.id.substring(4)
+        socket.emit("joinRoom", {roomToJoin: room, user: localUsername})
+      })
+      $("[id^=destroy]").click((e)=>{
+        room = e.target.id.substring(7)
+        socket.emit("deleteRoom", {roomOwner: room, roomToDelete: room})
+      })
+      
   });
+
 
   socket.on("removeUser", (user) => {
     $(`#${user.name}`).remove();
@@ -84,4 +125,5 @@ $(document).ready(function () {
     console.log(data.name);
     $(`#name${data.name}`).append(" (me)");
   });
+  
 });

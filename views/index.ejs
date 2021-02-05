@@ -110,18 +110,31 @@
           >
             Online Users
           </div>
-          <div id="rooms" style="font-size: large; font-weight: 500; cursor: pointer">Rooms</div>
+          <div
+            id="rooms"
+            style="font-size: large; font-weight: 500; cursor: pointer"
+          >
+            Rooms
+          </div>
         </div>
         <div id="userList">
-          <div style="display: flex; justify-content: start;" class="container">
+          <div style="display: flex; justify-content: start" class="container">
             <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
             <div styler="align-items: center">CoolUser513</div>
           </div>
         </div>
         <div id="roomList" style="display: none">
-          <div style="display: flex; justify-content: start" class="container">
-            <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
-            <div styler="align-items: center">CoolRoom</div>
+          <button
+            id="createRoom"
+            style="margin-left: auto; margin-top: 5px;"
+            type="button"
+            class=" btn btn-xs btn-secondary"
+            data-toggle="modal" 
+            data-target="#createRoomModal"
+          >
+            Create Room
+          </button>
+          <div id="theRooms">
           </div>
         </div>
       </div>
@@ -129,7 +142,9 @@
         class="container mainContainer col-lg-7"
         style="width: 50% !important"
       >
-        <div id="roomName" style="font-size: large; font-weight: 500">Room Id: 192LK8</div>
+        <div id="roomName" style="font-size: large; font-weight: 500">
+          Room Id: 192LK8
+        </div>
         <div id="chatBox" style="overflow-y: scroll; height: 83%">
           <div class="container">
             <!-- <img src="/w3images/bandmember.jpg" alt="Avatar" /> -->
@@ -178,7 +193,25 @@
         </div>
       </div>
     </div>
-
+    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModal" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Name your room</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <!-- <textarea id="roomToCreate" style="resize: none" class="mr-5 ml-5"> -->
+            <input type="text" id="roomToCreate" required class="ml-3 mr-3">
+          </textarea>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button id="createRoomButton" type="button" class="btn btn-primary">Create Room</button>
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- <div class="container">
       <div
         id="Chatbox"

@@ -11,6 +11,7 @@ const io = require("socket.io")(server);
 
 //Keep track of room hosts and participants
 let rooms = new Map();
+let roomhosts = new Map();
 
 //Keep track of online users
 let users = [];
@@ -29,12 +30,11 @@ io.on("connection", (socket) => {
   //the only participant
   var userId = socket.id;
   console.log(`New Connection ${socket.id}`);
-  rooms.set(socket.id, [socket.id]);
 
   //Give user a random username
   myUserName = socket.username = "User" + Math.floor(Math.random() * 2000 + 1);
   users.push({username: socket.username});
-  roomsArray.push({sid: socket.id, username: socket.username})
+  //roomsArray.push({sid: socket.id, username: socket.username})
 
   //Init browser local values for self identification/persistence
   socket.emit("newUserInit", {name: socket.username, sid: socket.id})
@@ -45,6 +45,34 @@ io.on("connection", (socket) => {
 
   io.sockets.emit("updateRooms", {
       all: roomsArray
+  })
+
+  socket.on("createRoom", (data) => {
+    socket.join(data.roomName)
+    console.log(`${data.name}: ${socket.id} has created the room ${data.roomName}`)
+
+    //UI info
+    roomsArray.push({sid: socket.id, username: socket.username, roomName: data.roomName})
+    //Server room logic maps
+    rooms.set(data.roomName, [socket.id]);
+    roomhosts.set(socket.id, data.roomName);
+
+    //Update client room info
+    io.sockets.emit("updateRooms", {
+        all: roomsArray
+    })
+  })
+
+  socket.on("joinRoom", (data) => {
+    socket.join(data.roomToJoin)
+    let newRoomMates = rooms.get(data.roomToJoin)
+    newRoomMates.push(socket.id) 
+    rooms.set(data.roomToJoin, newRoomMates)
+    console.log(`${data.user}: ${socket.id} has joined room ${data.roomToJoin}`)
+    socket.emit("joinedRoomStatus", {
+      status: "joined",
+      roomJoined: data.roomToJoin
+    })
   })
 
   socket.on("whoAmI", () => {
