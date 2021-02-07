@@ -12,7 +12,7 @@ $(document).ready(function () {
 
   let localUsername;
   let createdRoom = false;
-  let currentRoom;
+  let currentRoomInFocus = null;
 
   let userList;
   let roomList;
@@ -21,12 +21,36 @@ $(document).ready(function () {
   let userButton = $("#onlineUsers");
   let roomsButton = $("#rooms");
   let roomsOnline = $("#roomList");
-  let selectedRoom = $("#roomName");
+  let roomNames = $("#tabRoomNames");
   let roomers = $("#theRooms");
   let createRoom = $("#createRoomButton");
+  let mainChatWindow = $("#chatBox")
+
+  function changeChatTab(){
+    roomNames.children('span').each(el => {
+      let roomToFocus = el.target.id.substring(3)
+      console.log(roomToFocus)
+    })
+  }
+
+  roomNames.click(e => {
+    let roomToFocus = e.target.id.substring(3)
+    currentRoomInFocus = roomToFocus
+    roomNames.children('span').each((idx,item) =>{
+      let currentItem = item.id.substring(3)
+      if(currentItem !== roomToFocus){
+        $(`#tab${currentItem}`).css("background-color", "")
+        $(`#chatWindow${currentItem}`).css("display", "none")
+      }
+      else {
+        $(`#tab${currentItem}`).css("background", "lightgray")
+        $(`#chatWindow${currentItem}`).css("display", "")
+      }
+    })
+  })
 
   socket.on("newUserInit", (data) => {
-    selectedRoom.text(`Room Id: ${data.sid} (Your room)`);
+    // selectedRoom.text(`Create or join a room to get chatting tehehe`);
     localUsername = data.name;
   });
 
@@ -49,6 +73,11 @@ $(document).ready(function () {
     });
     console.log(roomName);
     $("#createRoomModal").modal("hide");
+
+    currentRoomInFocus = roomName
+    //This is not good and the server should send the ok for this.. gotta zoom also 
+    roomNames.append(`<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer">${roomName} (My room)</span>`)
+    mainChatWindow.append(`<div id=chatWindow${roomName} style="display: none;">Beginning of time for ${roomName}</div>`)
   });
 
   socket.on("joinedRoomStatus", (data) => {
@@ -64,6 +93,8 @@ $(document).ready(function () {
           roomToLeave: data.roomJoined
         });
       });
+      roomNames.append(`<span id=tab${data.roomJoined} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer">${data.roomJoined}</span>`)
+      mainChatWindow.append(`<div id=chatWindow${data.roomJoined} style="display: none;">Beginning of time for ${data.roomJoined}</div>`)
     } else if (data.status === "left") {
         myRooms = myRooms.filter(room => room != data.roomLeft)
         $(`#leave${data.roomLeft}`).replaceWith(`<button id='join${data.roomLeft}' style='margin-left: auto' type='button' class='btn btn-secondary btn-xs roomJoins'>Join</button>`)
@@ -75,17 +106,22 @@ $(document).ready(function () {
             roomToJoin: data.roomLeft
           });
         });
+        $(`#chatWindow${data.roomLeft}`).remove()
+        $(`#tab${data.roomLeft}`).remove()
     }
   });
 
   messageBox.keydown((key) => {
     if (key.keyCode === 13) {
+      if(!currentRoomInFocus){
+        alert("Please select a room to chat with.")
+      }
       let chatText = messageBox.val();
       key.preventDefault();
       socket.emit("sendMessage", {
         from: localUsername,
-        sid: socket.id,
         message: chatText,
+        roomToMessage: currentRoomInFocus
       });
       messageBox.val("");
     }
@@ -141,6 +177,8 @@ $(document).ready(function () {
     });
     $("[id^=destroy]").click((e) => {
       room = e.target.id.substring(7);
+      $(`#chatWindow${room}`).remove()
+      $(`#tab${room}`).remove()
       socket.emit("deleteRoom", { roomOwner: room, roomToDelete: room });
     });
     $(`[id^=leave2]`).click((e) => {
@@ -164,4 +202,29 @@ $(document).ready(function () {
     console.log(data.name);
     $(`#name${data.name}`).append(" (me)");
   });
+
+  socket.on("roomMessage", data => {
+    let chatWindowToUpdate = $(`#chatWindow${data.roomToMessage}`)
+    if(data.sid === socket.id){
+        chatWindowToUpdate.append(`        
+          <div class="container">
+            <img src="http://placekitten.com/200/300" alt="Avatar" />
+            <p>${data.from}: ${data.message}</p>
+            <span class="time-right">11:00</span>
+          </div>
+        `)
+    } else {
+      chatWindowToUpdate.append(`
+          <div class="container darker">
+            <img src="http://placekitten.com/200/300" alt="Avatar" class="right" />
+            <p>${data.from}: ${data.message}</p>
+            <span class="time-left">11:01</span>
+          </div>
+      `)
+    }
+    //chatWindowToUpdate.animate({ scrollTop: chatWindowToUpdate.prop("scrollHeight")}, 1000);
+    $(`#chatBox`).scrollTop($(`#chatBox`)[0].scrollHeight);
+
+    console.log(data.message)
+  })
 });
