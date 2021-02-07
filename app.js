@@ -25,7 +25,19 @@ app.get("/", function (req, res) {
   res.render("index");
 });
 
+
 io.on("connection", (socket) => {
+
+  function destroyRoom(data){
+    let usersToRemove = rooms.get(data.roomToDelete)
+    usersToRemove.map(user => {
+      io.of('/').sockets.get(user).leave(data.roomToDelete)
+      console.log(`Removed ${user} from ${data.roomToDelete}`)
+    })
+    roomhosts.delete(socket.id)
+    io.sockets.emit("removeRoom", {roomId: socket.id})
+  }
+
   //Keep track of socketId for room management, every user is a member of their own room which they start as
   //the only participant
   var userId = socket.id;
@@ -51,6 +63,11 @@ io.on("connection", (socket) => {
     socket.join(data.roomName)
     console.log(`${data.name}: ${socket.id} has created the room ${data.roomName}`)
 
+    //No duplicate room names allowed
+    if(rooms.get(data.roomName)){
+      return
+    }
+
     //UI info
     roomsArray.push({sid: socket.id, username: socket.username, roomName: data.roomName})
     //Server room logic maps
@@ -59,7 +76,18 @@ io.on("connection", (socket) => {
 
     //Update client room info
     io.sockets.emit("updateRooms", {
-        all: roomsArray
+          all: roomsArray
+      })
+  })
+
+  socket.on("leaveRoom", (data) => {
+    socket.leave(data.roomToLeave)
+    let newRoomMates = rooms.get(data.roomToLeave)
+    newRoomMates = newRoomMates.filter(user => user !== socket.id)
+    rooms.set(data.roomToLeave, newRoomMates)
+    socket.emit("joinedRoomStatus", {
+      roomLeft: data.roomToLeave,
+      status: "left"
     })
   })
 
@@ -79,12 +107,37 @@ io.on("connection", (socket) => {
     socket.emit("whoAmI", { name: socket.username });
   });
 
+  socket.on("deleteRoom", (data) => {
+    destroyRoom(data)
+  })
+
   //On a disconnect remove the host's room and disconnect other participants from the room.
   socket.on("disconnect", () => {
-    console.log(`${userId} had disconnected from the server.`);
-    rooms.delete(userId);
+    console.log(`${userId} has disconnected from the server.`);
     users = users.filter((name) => name.username !== socket.username);
     roomsArray = roomsArray.filter((room) => room.sid !== socket.id)
+    // let maybeRoom = roomhosts.get(socket.id)
+    // if(maybeRoom){
+    //   roomhosts.delete(socket.id)
+    // }
+
+    //Remove users from all rooms TODO: check if they are hose i.e position 0
+    for (const [key, value] of rooms.entries()) {
+      let updatedUsers = value.filter(leaverSid => leaverSid !== socket.id);
+      if(updatedUsers.length <= 0){
+        rooms.delete(key)
+      }
+      else if(updatedUsers.length < value.length){
+        rooms.set(key, updatedUsers)
+      }
+      console.log(rooms);
+    }
+
+    let maybeRoom = roomhosts.get(socket.id)
+    if(maybeRoom){
+      destroyRoom({roomToDelete: maybeRoom, roomId: socket.id})
+    }
+
     io.sockets.emit("removeUser", {
       name: socket.username,
     });
