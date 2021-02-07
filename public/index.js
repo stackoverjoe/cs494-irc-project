@@ -159,7 +159,7 @@ $(document).ready(function () {
       }
       ${
         localUsername !== room.username && myRooms.includes(room.roomName)
-          ? `<button id='leave2${room.roomName}' style='margin-left: auto' type='button' class='btn btn-danger btn-xs roomJoins'>Leave</button>`
+          ? `<button id='leave${room.roomName}' style='margin-left: auto' type='button' class='btn btn-danger btn-xs roomJoins'>Leave</button>`
           : ""
       }
        ${
