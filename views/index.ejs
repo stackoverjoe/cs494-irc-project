@@ -142,8 +142,8 @@
         class="container mainContainer col-lg-7"
         style="width: 50% !important;"
       >
-        <div id="roomName" style="font-size: large; font-weight: 500; border-bottom: darkgray; border-bottom-width: 1px; border-bottom-style: solid;">
-          Rooms: <span style="overflow-x: scroll;" id="tabRoomNames"></span>
+        <div id="roomName" style="font-size: large; font-weight: 500; border-bottom: darkgray; border-bottom-width: 1px; border-bottom-style: solid; overflow-x: scroll; display: flex">
+          Rooms: <span id="tabRoomNames" style="display: inline-block; flex: 1 0 auto; scrollbar-width: none;" class=""></span>
         </div>
         <div id="chatBox" style="overflow-y: scroll; height: 83%">
           <!-- <div class="container">
@@ -193,6 +193,7 @@
         </div>
       </div>
     </div>
+    <!-- Create Room Modal -->
     <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModal" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -212,6 +213,26 @@
         </div>
       </div>
     </div>
+
+  <!--Room Memebrs Modal -->
+  <div class="modal fade" id="membersModal" tabindex="-1" role="dialog" aria-labelledby="membersModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="memberModalTitle">Modal title</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div id="memberModalBody" class="modal-body">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
     <!-- <div class="container">
       <div
         id="Chatbox"

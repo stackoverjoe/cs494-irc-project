@@ -60,13 +60,27 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    console.log(data.roomToMessage)
-    console.log(data.message)
+    console.log(data.roomToMessage);
+    console.log(data.message);
     io.to(data.roomToMessage).emit("roomMessage", {
       message: data.message,
       from: data.from,
       sid: socket.id,
-      roomToMessage: data.roomToMessage
+      roomToMessage: data.roomToMessage,
+    });
+  });
+
+  socket.on("getMembers", (data) => {
+    let requestedMembers = rooms.get(data.room);
+    if (requestedMembers) {
+      requestedMembers = requestedMembers.map((mem) => {
+        let s = io.of("/").sockets.get(mem);
+        return { username: s.username, id: s.id };
+      });
+    }
+    socket.emit("requestMemberResponse", {
+      members: requestedMembers,
+      room: data.room,
     });
   });
 
@@ -100,8 +114,10 @@ io.on("connection", (socket) => {
   socket.on("leaveRoom", (data) => {
     socket.leave(data.roomToLeave);
     let newRoomMates = rooms.get(data.roomToLeave);
-    newRoomMates = newRoomMates.filter((user) => user !== socket.id);
-    rooms.set(data.roomToLeave, newRoomMates);
+    if(newRoomMates){
+      newRoomMates = newRoomMates.filter((user) => user !== socket.id);
+      rooms.set(data.roomToLeave, newRoomMates);
+    }
     socket.emit("joinedRoomStatus", {
       roomLeft: data.roomToLeave,
       status: "left",
