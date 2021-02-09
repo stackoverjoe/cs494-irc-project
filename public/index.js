@@ -30,6 +30,8 @@ $(document).ready(function () {
     });
   }
 
+  function toastMaker(from, message) {}
+
   roomNames.click((e) => {
     let roomToFocus = e.target.id.substring(3);
     currentRoomInFocus = roomToFocus;
@@ -53,15 +55,15 @@ $(document).ready(function () {
   userButton.click(() => {
     roomsOnline.css("display", "none");
     onlineUsers.css("display", "");
-    $("#rooms").css("background", "")
-    $("#onlineUsers").css("background", "lightgray")
+    $("#rooms").css("background", "");
+    $("#onlineUsers").css("background", "lightgray");
   });
 
   roomsButton.click(() => {
     onlineUsers.css("display", "none");
     roomsOnline.css("display", "");
-    $("#onlineUsers").css("background", "")
-    $("#rooms").css("background", "lightgray")
+    $("#onlineUsers").css("background", "");
+    $("#rooms").css("background", "lightgray");
   });
 
   createRoom.click(() => {
@@ -150,14 +152,63 @@ $(document).ready(function () {
       ${
         localUsername === online.username
           ? " (me)"
-          : `<i id=private${online.sid} class='fas fa-location-arrow style='color: darkgray; font-size: 30px;'></i>`
-      }</div>`
+          : `<i id=privateX${online.sid} class='fas fa-location-arrow style='color: darkgray; font-size: 30px;'><div id=${online.username} style="display: none;"></div></i>`
+      }</div>`;
     });
     onlineUsers.html(userList);
-    $("[id^=private]").click(e =>{
-      let sendTo = e.target.id.substring(7)
-      socket.emit("privateMessage", {from: localUsername, to: sendTo})
+    $("[id^=privateX]").click((e) => {
+      let toName = e.target.querySelector("div").id;
+      let sendTo = e.target.id.substring(8);
+      $("#privateMessageTo").text(`To: ${toName}`);
+      $("#stagingDest").text(sendTo);
+      $("#privateMessageModal").modal("show");
+      //socket.emit("privateMessage", {from: localUsername, to: sendTo})
+    });
+  });
+
+  $("#sendPrivateMessage").click(() => {
+    let message = $("#privateMessageContent").val();
+    let sendTo = $("#stagingDest").text();
+    console.log("SENDINGTO " + sendTo);
+    $("#privateMessageContent").val("");
+    $("#privateMessageModal").modal("hide");
+    socket.emit("privateMessage", {
+      from: localUsername,
+      to: sendTo,
+      message: message,
+    });
+  });
+
+  let cleaner = null;
+  socket.on("privateMessage", (data) => {
+    $("#theToasts").prepend(`
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+      <div class="toast-header">
+        <strong class="mr-auto">Message from ${data.from}</strong>
+        <small class="text-muted">just now</small>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="toast-body">
+        ${data.message}
+      </div>
+  </div>
+    `);
+    $('.toast').toast({
+      delay: 5000
     })
+
+    //Set toast shelf life to 10 seconds.
+    if(!cleaner){
+      cleaner = setTimeout(() => {
+        $("#theToasts").html("")
+        clearTimeout(cleaner)
+        cleaner = null;
+      }, 10000)
+    }
+
+    $(".toast").toast('show')
   });
 
   socket.on("updateRooms", (rooms) => {
@@ -224,9 +275,9 @@ $(document).ready(function () {
 
   socket.on("removeRoom", (room) => {
     $(`#room${room.roomId}`).remove();
-    if(room.roomName){
-      $(`#tab${room.roomName}`).remove()
-      $(`#chatWindow${room.roomName}`).remove()
+    if (room.roomName) {
+      $(`#tab${room.roomName}`).remove();
+      $(`#chatWindow${room.roomName}`).remove();
     }
   });
 
