@@ -60,8 +60,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
-    console.log(data.roomToMessage);
-    console.log(data.message);
     io.to(data.roomToMessage).emit("roomMessage", {
       message: data.message,
       from: data.from,
