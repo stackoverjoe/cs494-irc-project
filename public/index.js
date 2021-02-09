@@ -53,11 +53,15 @@ $(document).ready(function () {
   userButton.click(() => {
     roomsOnline.css("display", "none");
     onlineUsers.css("display", "");
+    $("#rooms").css("background", "")
+    $("#onlineUsers").css("background", "lightgray")
   });
 
   roomsButton.click(() => {
     onlineUsers.css("display", "none");
     roomsOnline.css("display", "");
+    $("#onlineUsers").css("background", "")
+    $("#rooms").css("background", "lightgray")
   });
 
   createRoom.click(() => {
@@ -73,7 +77,7 @@ $(document).ready(function () {
     currentRoomInFocus = roomName;
     //This is not good and the server should send the ok for this.. gotta zoom also
     roomNames.append(
-      `<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer;">${roomName} (My room)</span>`
+      `<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer; border-top-left-radius: 5px; border-bottom-left-radius: 5px">${roomName} (My room)</span>`
     );
     mainChatWindow.append(
       `<div id=chatWindow${roomName} style="display: none;">Beginning of time for ${roomName}</div>`
@@ -94,7 +98,7 @@ $(document).ready(function () {
         });
       });
       roomNames.append(
-        `<span id=tab${data.roomJoined} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer">${data.roomJoined}</span>`
+        `<span id=tab${data.roomJoined} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer; border-top-left-radius: 5px; border-bottom-left-radius: 5px">${data.roomJoined}</span>`
       );
       mainChatWindow.append(
         `<div id=chatWindow${data.roomJoined} style="display: none;">Beginning of time for ${data.roomJoined}</div>`
@@ -146,10 +150,14 @@ $(document).ready(function () {
       ${
         localUsername === online.username
           ? " (me)"
-          : "<i class='fas fa-location-arrow style='color: darkgray; font-size: 30px;'></i>"
+          : `<i id=private${online.sid} class='fas fa-location-arrow style='color: darkgray; font-size: 30px;'></i>`
       }</div>`
     });
     onlineUsers.html(userList);
+    $("[id^=private]").click(e =>{
+      let sendTo = e.target.id.substring(7)
+      socket.emit("privateMessage", {from: localUsername, to: sendTo})
+    })
   });
 
   socket.on("updateRooms", (rooms) => {
@@ -216,6 +224,10 @@ $(document).ready(function () {
 
   socket.on("removeRoom", (room) => {
     $(`#room${room.roomId}`).remove();
+    if(room.roomName){
+      $(`#tab${room.roomName}`).remove()
+      $(`#chatWindow${room.roomName}`).remove()
+    }
   });
 
   socket.on("whoAmI", (data) => {

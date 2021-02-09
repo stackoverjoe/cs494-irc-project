@@ -35,7 +35,7 @@ io.on("connection", (socket) => {
       });
     }
     roomhosts.delete(socket.id);
-    io.sockets.emit("removeRoom", { roomId: socket.id });
+    io.sockets.emit("removeRoom", { roomId: socket.id, roomName: data.roomToDelete });
   }
 
   //Keep track of socketId for room management, every user is a member of their own room which they start as
@@ -45,7 +45,7 @@ io.on("connection", (socket) => {
 
   //Give user a random username
   myUserName = socket.username = "User" + Math.floor(Math.random() * 2000 + 1);
-  users.push({ username: socket.username });
+  users.push({ username: socket.username, sid: socket.id });
   //roomsArray.push({sid: socket.id, username: socket.username})
 
   //Init browser local values for self identification/persistence
@@ -144,15 +144,15 @@ io.on("connection", (socket) => {
     destroyRoom(data);
   });
 
+  socket.on("privateMessage", data => {
+    io.to(data.to).emit("privateMessage", {from: data.from, message: data.message})
+  })
+
   //On a disconnect remove the host's room and disconnect other participants from the room.
   socket.on("disconnect", () => {
     console.log(`${userId} has disconnected from the server.`);
     users = users.filter((name) => name.username !== socket.username);
     roomsArray = roomsArray.filter((room) => room.sid !== socket.id);
-    // let maybeRoom = roomhosts.get(socket.id)
-    // if(maybeRoom){
-    //   roomhosts.delete(socket.id)
-    // }
 
     //Remove users from all rooms TODO: check if they are hose i.e position 0
     for (const [key, value] of rooms.entries()) {
@@ -175,6 +175,7 @@ io.on("connection", (socket) => {
     });
     io.sockets.emit("removeRoom", {
       roomId: socket.id,
+      roomName: maybeRoom
     });
   });
 });
