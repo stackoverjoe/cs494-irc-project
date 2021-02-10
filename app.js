@@ -17,7 +17,6 @@ let roomhosts = new Map();
 let users = [];
 let roomsArray = [];
 
-// var outTime = date.format(currentTime, 'hh:mm:ss A')
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 
@@ -60,11 +59,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("sendMessage", (data) => {
+    const now = new Date();
+    const time = date.format(now, 'h:mm:ss A')
     io.to(data.roomToMessage).emit("roomMessage", {
       message: data.message,
       from: data.from,
       sid: socket.id,
       roomToMessage: data.roomToMessage,
+      time: time
     });
   });
 

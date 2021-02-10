@@ -94,7 +94,7 @@
     <script src="https://kit.fontawesome.com/a076d05399.js"></script>
   </head>
   <body>
-    <div class="container-fluid row" style="height: 70%;">
+    <div class="container-fluid row" style="height: 70%">
       <div class="container col-lg-4">
         <div style="display: flex; flex-direction: row">
           <div
@@ -115,7 +115,15 @@
           </div>
           <div
             id="rooms"
-            style="font-size: large; font-weight: 500; cursor: pointer; border-top-right-radius: 5px; border-bottom-right-radius: 5px; padding-left: 5px; padding-right: 5px;"
+            style="
+              font-size: large;
+              font-weight: 500;
+              cursor: pointer;
+              border-top-right-radius: 5px;
+              border-bottom-right-radius: 5px;
+              padding-left: 5px;
+              padding-right: 5px;
+            "
           >
             Rooms
           </div>
@@ -129,24 +137,43 @@
         <div id="roomList" style="display: none">
           <button
             id="createRoom"
-            style="margin-left: auto; margin-top: 5px;"
+            style="margin-left: auto; margin-top: 5px"
             type="button"
-            class=" btn btn-xs btn-secondary"
-            data-toggle="modal" 
+            class="btn btn-xs btn-secondary"
+            data-toggle="modal"
             data-target="#createRoomModal"
           >
             Create Room
           </button>
-          <div id="theRooms">
-          </div>
+          <div id="theRooms"></div>
         </div>
       </div>
       <div
         class="container mainContainer col-lg-7"
-        style="width: 50% !important;"
+        style="width: 50% !important"
       >
-        <div id="roomName" style="font-size: large; font-weight: 500; border-bottom: darkgray; border-bottom-width: 1px; border-bottom-style: solid; overflow-x: scroll; display: flex">
-          Rooms:&nbsp <span id="tabRoomNames" style="display: inline-block; flex: 1 0 auto; scrollbar-width: none;" class=""></span>
+        <div
+          id="roomName"
+          style="
+            font-size: large;
+            font-weight: 500;
+            border-bottom: darkgray;
+            border-bottom-width: 1px;
+            border-bottom-style: solid;
+            overflow-x: scroll;
+            display: flex;
+          "
+          data-toggle="tooltip"
+          data-placement="bottom"
+          data-trigger="manual"
+          title="Click a room name to start chatting."
+        >
+          Rooms:&nbsp
+          <span
+            id="tabRoomNames"
+            style="display: inline-block; flex: 1 0 auto; scrollbar-width: none"
+            class=""
+          ></span>
         </div>
         <div id="chatBox" style="overflow-y: scroll; height: 83%">
           <!-- <div class="container">
@@ -197,71 +224,137 @@
       </div>
     </div>
     <!-- Create Room Modal -->
-    <div class="modal fade" id="createRoomModal" tabindex="-1" role="dialog" aria-labelledby="createRoomModal" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="createRoomModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="createRoomModal"
+      aria-hidden="true"
+    >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">Name your room</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
           <!-- <textarea id="roomToCreate" style="resize: none" class="mr-5 ml-5"> -->
-            <input type="text" id="roomToCreate" required class="ml-3 mr-3">
+          <input type="text" id="roomToCreate" required class="ml-3 mr-3" />
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button id="createRoomButton" type="button" class="btn btn-primary">Create Room</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button id="createRoomButton" type="button" class="btn btn-primary">
+              Create Room
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Private Message Modal -->
-    <div class="modal fade" id="privateMessageModal" tabindex="-1" role="dialog" aria-labelledby="privateMessageModal" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="privateMessageModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="privateMessageModal"
+      aria-hidden="true"
+    >
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="privateMessageTo"></h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-          <div id="stagingDest" style="display: none;"></div>
+          <div id="stagingDest" style="display: none"></div>
           <!-- <textarea id="roomToCreate" style="resize: none" class="mr-5 ml-5"> -->
-            <div style="padding-left: 15px">Message
-            <input type="text" id="privateMessageContent" style="width: 70%" required class="ml-3 mr-3">
-            </div>
+          <div style="padding-left: 15px">
+            Message
+            <input
+              type="text"
+              id="privateMessageContent"
+              style="width: 70%"
+              required
+              class="ml-3 mr-3"
+            />
+          </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button id="sendPrivateMessage" type="button" class="btn btn-primary">Send</button>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+            <button
+              id="sendPrivateMessage"
+              type="button"
+              class="btn btn-primary"
+            >
+              Send
+            </button>
           </div>
         </div>
       </div>
     </div>
 
-  <!--Room Memebrs Modal -->
-  <div class="modal fade" id="membersModal" tabindex="-1" role="dialog" aria-labelledby="membersModal" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="memberModalTitle">Modal title</h5>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div id="memberModalBody" class="modal-body">
-          ...
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+    <!--Room Memebrs Modal -->
+    <div
+      class="modal fade"
+      id="membersModal"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="membersModal"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="memberModalTitle">Modal title</h5>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div id="memberModalBody" class="modal-body">...</div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-dismiss="modal"
+            >
+              Close
+            </button>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-<!--The Toasts-->
-  <div id="theToasts">
-
-  </div>
+    <!--The Toasts-->
+    <div id="theToasts"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
     <script
       src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

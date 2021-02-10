@@ -10,6 +10,7 @@ $(document).ready(function () {
 
   let localUsername;
   let currentRoomInFocus = null;
+  let hasLearned = false;
 
   let userList;
   let roomList;
@@ -23,14 +24,9 @@ $(document).ready(function () {
   let createRoom = $("#createRoomButton");
   let mainChatWindow = $("#chatBox");
 
-  function changeChatTab() {
-    roomNames.children("span").each((el) => {
-      let roomToFocus = el.target.id.substring(3);
-      console.log(roomToFocus);
-    });
-  }
-
-  function toastMaker(from, message) {}
+  $(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
 
   roomNames.click((e) => {
     let roomToFocus = e.target.id.substring(3);
@@ -84,6 +80,14 @@ $(document).ready(function () {
     mainChatWindow.append(
       `<div id=chatWindow${roomName} style="display: none;">Beginning of time for ${roomName}</div>`
     );
+    if (!hasLearned) {
+      $("#roomName").tooltip("show");
+      hasLearned = true;
+    }
+    let timeout = setTimeout(() => {
+      $("#roomName").tooltip("hide");
+      clearTimeout(timeout);
+    }, 3000);
   });
 
   socket.on("joinedRoomStatus", (data) => {
@@ -105,6 +109,14 @@ $(document).ready(function () {
       mainChatWindow.append(
         `<div id=chatWindow${data.roomJoined} style="display: none;">Beginning of time for ${data.roomJoined}</div>`
       );
+      if (!hasLearned) {
+        $("#roomName").tooltip("show");
+        hasLearned = true;
+      }
+      let timeout = setTimeout(() => {
+        $("#roomName").tooltip("hide");
+        clearTimeout(timeout);
+      }, 3000);
     } else if (data.status === "left") {
       myRooms = myRooms.filter((room) => room != data.roomLeft);
       $(`#leave${data.roomLeft}`).replaceWith(
@@ -195,20 +207,20 @@ $(document).ready(function () {
       </div>
   </div>
     `);
-    $('.toast').toast({
-      delay: 5000
-    })
+    $(".toast").toast({
+      delay: 5000,
+    });
 
     //Set toast shelf life to 10 seconds.
-    if(!cleaner){
+    if (!cleaner) {
       cleaner = setTimeout(() => {
-        $("#theToasts").html("")
-        clearTimeout(cleaner)
+        $("#theToasts").html("");
+        clearTimeout(cleaner);
         cleaner = null;
-      }, 10000)
+      }, 10000);
     }
 
-    $(".toast").toast('show')
+    $(".toast").toast("show");
   });
 
   socket.on("updateRooms", (rooms) => {
@@ -324,7 +336,7 @@ $(document).ready(function () {
           <div class="container">
             <img src="http://placekitten.com/200/300" alt="Avatar" />
             <p>${data.from}: ${data.message}</p>
-            <span class="time-right">11:00</span>
+            <span class="time-right">${data.time}</span>
           </div>
         `);
     } else {
@@ -332,7 +344,7 @@ $(document).ready(function () {
           <div class="container darker">
             <img src="http://placekitten.com/200/300" alt="Avatar" class="right" />
             <p>${data.from}: ${data.message}</p>
-            <span class="time-left">11:01</span>
+            <span class="time-left">${data.time}</span>
           </div>
       `);
     }
