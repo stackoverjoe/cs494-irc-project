@@ -13,7 +13,7 @@ const io = require("socket.io")(server);
 let rooms = new Map();
 let roomhosts = new Map();
 
-//Keep track of online users
+//Keep track of online users`
 let users = [];
 let roomsArray = [];
 
@@ -34,6 +34,7 @@ io.on("connection", (socket) => {
       });
     }
     roomhosts.delete(socket.id);
+    roomsArray = roomsArray.filter(room => room.roomName !== data.roomToDelete)
     io.sockets.emit("removeRoom", { roomId: socket.id, roomName: data.roomToDelete });
   }
 

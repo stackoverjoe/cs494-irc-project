@@ -63,7 +63,13 @@ $(document).ready(function () {
   });
 
   createRoom.click(() => {
+    //enfore alphanumeric room naming policy
+    let re = /^[A-Za-z\d]*$/;
     let roomName = $("#roomToCreate").val();
+    if(!re.test(roomName)){
+      alert("Room names must consist of only letters and numbers with no spaces.")
+      return
+    }
     socket.emit("createRoom", {
       sid: socket.id,
       roomName: roomName,
@@ -71,7 +77,7 @@ $(document).ready(function () {
     });
     console.log(roomName);
     $("#createRoomModal").modal("hide");
-
+    $("#createRoom").prop("disabled", true)
     currentRoomInFocus = roomName;
     //This is not good and the server should send the ok for this.. gotta zoom also
     roomNames.append(
@@ -265,6 +271,7 @@ $(document).ready(function () {
       $(`#chatWindow${room}`).remove();
       $(`#tab${room}`).remove();
       socket.emit("deleteRoom", { roomOwner: room, roomToDelete: room });
+      $('#createRoom').prop("disabled", false)
     });
     $(`[id^=leave]`).click((e) => {
       roomleft = e.target.id.substring(5);
