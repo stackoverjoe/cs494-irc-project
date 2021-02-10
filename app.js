@@ -24,7 +24,21 @@ app.get("/", function (req, res) {
   res.render("index");
 });
 
+function sanitize(string) {
+  const map = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#x27;',
+      "/": '&#x2F;',
+  };
+  const reg = /[&<>"'/]/ig;
+  return string.replace(reg, (match)=>(map[match]));
+}
+
 io.on("connection", (socket) => {
+
   function destroyRoom(data) {
     let usersToRemove = rooms.get(data.roomToDelete);
     if (usersToRemove) {
@@ -63,7 +77,7 @@ io.on("connection", (socket) => {
     const now = new Date();
     const time = date.format(now, 'h:mm:ss A')
     io.to(data.roomToMessage).emit("roomMessage", {
-      message: data.message,
+      message: sanitize(data.message),
       from: data.from,
       sid: socket.id,
       roomToMessage: data.roomToMessage,
