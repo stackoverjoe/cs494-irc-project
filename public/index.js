@@ -30,11 +30,18 @@ $(document).ready(function () {
   let roomers = $("#theRooms");
   let createRoom = $("#createRoomButton");
   let mainChatWindow = $("#chatBox");
+  let forceDisconnect = $("#forceDisconnect")
 
   //Enable tooltips
   $(function () {
     $('[data-toggle="tooltip"]').tooltip();
   });
+
+  //Allow the user to disconnect from the server
+  forceDisconnect.click(()=>{
+    socket.disconnect()
+    alert("You have been disconnected from the server. If you would like to reconnect, navigate to the url again or refresh your page.")
+  })
 
   //Handle a room being clicked on. This is how the ui will display messages
   //from a particular room while hiding the ones we do not care about from others
