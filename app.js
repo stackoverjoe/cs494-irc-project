@@ -9,7 +9,11 @@ var app = express();
 const server = app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*"
+  }
+});
 
 //Keep track of room hosts and participants
 let rooms = new Map();
@@ -47,16 +51,17 @@ function sanitize(string) {
 }
 
 //Uncomment this out if you have ngrok credentials and want to make chat available online
-// (async function () {
-//   try {
-//     const url = await ngrok.connect({
-//       proto: "http",
-//       addr: 4000
-//     });
-//   } catch (e) {
-//     console.log(e);
-//   }
-// })();
+(async function () {
+  try {
+    const url = await ngrok.connect({
+      proto: "http",
+      addr: 4000
+    });
+    console.log("Go to: " + url)
+  } catch (e) {
+    console.log(e);
+  }
+})();
 
 io.on("connection", (socket) => {
   //destroyRoom removes all clients from an outgoing room. Removes the room from the UI supplier.
@@ -87,7 +92,6 @@ io.on("connection", (socket) => {
   //Give user a random username
   myUserName = socket.username = "User" + Math.floor(Math.random() * 2000 + 1);
   users.push({ username: socket.username, sid: socket.id });
-  //roomsArray.push({sid: socket.id, username: socket.username})
 
   //Init browser local values for self identification/persistence
   socket.emit("newUserInit", { name: socket.username, sid: socket.id });

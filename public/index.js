@@ -108,7 +108,7 @@ $(document).ready(function () {
     //This is not ideal and the server should send the ok for this.
     //But we assume the room will be created for UI ease sake
     roomNames.append(
-      `<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer; border-top-left-radius: 5px; border-bottom-left-radius: 5px">${roomName} (My room)</span>`
+      `<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer; border-top-left-radius: 5px; border-bottom-left-radius: 5px">${roomName} (Your room)</span>`
     );
     //Append that window to the DOM, hidden by default
     mainChatWindow.append(
