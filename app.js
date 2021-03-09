@@ -1,6 +1,8 @@
 const express = require("express");
 const { v4: uuidv4 } = require("uuid");
 const date = require("date-and-time");
+const cors = require("cors");
+const ngrok = require("ngrok");
 
 const port = 4000;
 var app = express();
@@ -17,28 +19,47 @@ let roomhosts = new Map();
 let users = [];
 let roomsArray = [];
 
-app.use(express.static("public"));
+app.use(express.static("public", {
+  setHeaders: function(res, path){
+    res.set("Access-Control-Allow-Origin", "*");
+  }
+}));
+
 app.set("view engine", "ejs");
 
 app.get("/", function (req, res) {
   res.render("index");
 });
 
+//Function to replace dangerous characters with safe alternative to stop from
+//code injection
 function sanitize(string) {
   const map = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#x27;',
-      "/": '&#x2F;',
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#x27;",
+    "/": "&#x2F;",
   };
-  const reg = /[&<>"'/]/ig;
-  return string.replace(reg, (match)=>(map[match]));
+  const reg = /[&<>"'/]/gi;
+  return string.replace(reg, (match) => map[match]);
 }
 
-io.on("connection", (socket) => {
+//Uncomment this out if you have ngrok credentials and want to make chat available online
+// (async function () {
+//   try {
+//     const url = await ngrok.connect({
+//       proto: "http",
+//       addr: 4000
+//     });
+//   } catch (e) {
+//     console.log(e);
+//   }
+// })();
 
+io.on("connection", (socket) => {
+  //destroyRoom removes all clients from an outgoing room. Removes the room from the UI supplier.
   function destroyRoom(data) {
     let usersToRemove = rooms.get(data.roomToDelete);
     if (usersToRemove) {
@@ -47,9 +68,15 @@ io.on("connection", (socket) => {
         console.log(`Removed ${user} from ${data.roomToDelete}`);
       });
     }
+
     roomhosts.delete(socket.id);
-    roomsArray = roomsArray.filter(room => room.roomName !== data.roomToDelete)
-    io.sockets.emit("removeRoom", { roomId: socket.id, roomName: data.roomToDelete });
+    roomsArray = roomsArray.filter(
+      (room) => room.roomName !== data.roomToDelete
+    );
+    io.sockets.emit("removeRoom", {
+      roomId: socket.id,
+      roomName: data.roomToDelete,
+    });
   }
 
   //Keep track of socketId for room management, every user is a member of their own room which they start as
@@ -65,26 +92,30 @@ io.on("connection", (socket) => {
   //Init browser local values for self identification/persistence
   socket.emit("newUserInit", { name: socket.username, sid: socket.id });
 
+  //Update the UI for list of users for all clients
   io.sockets.emit("updateUser", {
     users: users,
   });
 
+  //Update the UI for list of rooms for all clients
   io.sockets.emit("updateRooms", {
     all: roomsArray,
   });
 
+  //A client has requested to send a message to all users of a particular room
   socket.on("sendMessage", (data) => {
     const now = new Date();
-    const time = date.format(now, 'h:mm:ss A')
+    const time = date.format(now, "h:mm:ss A");
     io.to(data.roomToMessage).emit("roomMessage", {
       message: sanitize(data.message),
       from: data.from,
       sid: socket.id,
       roomToMessage: data.roomToMessage,
-      time: time
+      time: time,
     });
   });
 
+  //A function to return all users associated with a particular room.
   socket.on("getMembers", (data) => {
     let requestedMembers = rooms.get(data.room);
     if (requestedMembers) {
@@ -99,6 +130,7 @@ io.on("connection", (socket) => {
     });
   });
 
+  //A client has requested to create a room.
   socket.on("createRoom", (data) => {
     socket.join(data.roomName);
     console.log(
@@ -126,10 +158,18 @@ io.on("connection", (socket) => {
     });
   });
 
+  //Send a list of all rooms upon client request
+  socket.on("getRooms", () => {
+    socket.emit("getRooms", {
+      rooms: roomsArray
+    })
+  })
+
+  //A client has rquested to leave a room
   socket.on("leaveRoom", (data) => {
     socket.leave(data.roomToLeave);
     let newRoomMates = rooms.get(data.roomToLeave);
-    if(newRoomMates){
+    if (newRoomMates) {
       newRoomMates = newRoomMates.filter((user) => user !== socket.id);
       rooms.set(data.roomToLeave, newRoomMates);
     }
@@ -139,6 +179,7 @@ io.on("connection", (socket) => {
     });
   });
 
+  //A client has requeted to join a room
   socket.on("joinRoom", (data) => {
     socket.join(data.roomToJoin);
     let newRoomMates = rooms.get(data.roomToJoin);
@@ -153,19 +194,21 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("whoAmI", () => {
-    socket.emit("whoAmI", { name: socket.username });
-  });
-
+  //A client has requested to delete a room that they created
   socket.on("deleteRoom", (data) => {
     destroyRoom(data);
   });
 
-  socket.on("privateMessage", data => {
-    io.to(data.to).emit("privateMessage", {from: data.from, message: data.message})
-  })
+  //A client has requested to send a message to a particular user
+  socket.on("privateMessage", (data) => {
+    io.to(data.to).emit("privateMessage", {
+      from: data.from,
+      message: data.message,
+    });
+  });
 
   //On a disconnect remove the host's room and disconnect other participants from the room.
+  //This handles all instances of a client losing connection with the server
   socket.on("disconnect", () => {
     console.log(`${userId} has disconnected from the server.`);
     users = users.filter((name) => name.username !== socket.username);
@@ -192,7 +235,7 @@ io.on("connection", (socket) => {
     });
     io.sockets.emit("removeRoom", {
       roomId: socket.id,
-      roomName: maybeRoom
+      roomName: maybeRoom,
     });
   });
 });

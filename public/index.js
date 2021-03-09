@@ -1,5 +1,7 @@
 $(document).ready(function () {
+  //Keep track of rooms client is a part of for UI
   let myRooms = [];
+  //Connect to server  
   var socket = io.connect("http://localhost:4000", {
     reconnection: false,
     forcedNewConnection: false,
@@ -8,12 +10,17 @@ $(document).ready(function () {
     `Connected as ${console.log(socket.id)}`;
   });
 
+  //Store local variables
   let localUsername;
   let currentRoomInFocus = null;
   let hasLearned = false;
 
+  //Array of user recevied from server
   let userList;
+  //Array of rooms received from server
   let roomList;
+
+  //Get dom elements for UI manipulation via jquery
   let onlineUsers = $("#userList");
   let messageBox = $("#messageBox");
   let userButton = $("#onlineUsers");
@@ -24,10 +31,13 @@ $(document).ready(function () {
   let createRoom = $("#createRoomButton");
   let mainChatWindow = $("#chatBox");
 
+  //Enable tooltips
   $(function () {
     $('[data-toggle="tooltip"]').tooltip();
   });
 
+  //Handle a room being clicked on. This is how the ui will display messages
+  //from a particular room while hiding the ones we do not care about from others
   roomNames.click((e) => {
     let roomToFocus = e.target.id.substring(3);
     currentRoomInFocus = roomToFocus;
@@ -43,11 +53,15 @@ $(document).ready(function () {
     });
   });
 
+  //This is sent as an acknowledgment that the server has connected
+  //it contains the username assigned that we will store locally
+  //for easy reference
   socket.on("newUserInit", (data) => {
-    // selectedRoom.text(`Create or join a room to get chatting tehehe`);
     localUsername = data.name;
   });
 
+  //Left hand side of the ui, are we displaying the users or the rooms?
+  //The users
   userButton.click(() => {
     roomsOnline.css("display", "none");
     onlineUsers.css("display", "");
@@ -55,6 +69,7 @@ $(document).ready(function () {
     $("#onlineUsers").css("background", "lightgray");
   });
 
+  //The rooms
   roomsButton.click(() => {
     onlineUsers.css("display", "none");
     roomsOnline.css("display", "");
@@ -62,40 +77,50 @@ $(document).ready(function () {
     $("#rooms").css("background", "lightgray");
   });
 
+  //Handle the creation of a room
   createRoom.click(() => {
     //enfore alphanumeric room naming policy
+    //The ui utilizes this information as an id in the dom so it has constraints
     let re = /^[A-Za-z\d]*$/;
     let roomName = $("#roomToCreate").val();
-    if(!re.test(roomName)){
-      alert("Room names must consist of only letters and numbers with no spaces.")
-      return
+    if (!re.test(roomName)) {
+      alert(
+        "Room names must consist of only letters and numbers with no spaces."
+      );
+      return;
     }
+    //Inform the server we would like to create a room
     socket.emit("createRoom", {
       sid: socket.id,
       roomName: roomName,
       name: localUsername,
     });
-    console.log(roomName);
     $("#createRoomModal").modal("hide");
-    $("#createRoom").prop("disabled", true)
+    $("#createRoom").prop("disabled", true);
     currentRoomInFocus = roomName;
-    //This is not good and the server should send the ok for this.. gotta zoom also
+    //This is not ideal and the server should send the ok for this.
+    //But we assume the room will be created for UI ease sake
     roomNames.append(
       `<span id=tab${roomName} style="padding-right: 5px; margin-right: 5px; border-right: 1px solid black; cursor: pointer; border-top-left-radius: 5px; border-bottom-left-radius: 5px">${roomName} (My room)</span>`
     );
+    //Append that window to the DOM, hidden by default
     mainChatWindow.append(
       `<div id=chatWindow${roomName} style="display: none;">Beginning of time for ${roomName}</div>`
     );
+    $("#roomToCreate").val("");
+    //Tooltip to instruct user how to send messages to room
     if (!hasLearned) {
       $("#roomName").tooltip("show");
       hasLearned = true;
     }
+    //Close the tooltip after 3 seconds
     let timeout = setTimeout(() => {
       $("#roomName").tooltip("hide");
       clearTimeout(timeout);
     }, 3000);
   });
 
+  //Either a room has been joined or left, check what and dispatch accordingly
   socket.on("joinedRoomStatus", (data) => {
     if (data.status === "joined") {
       $(`#join${data.roomJoined}`).replaceWith(
@@ -103,7 +128,6 @@ $(document).ready(function () {
       );
       $(`#leave${data.roomJoined}`).click((e) => {
         roomleft = e.target.id.substring(5);
-        console.log(roomleft);
         socket.emit("leaveRoom", {
           username: localUsername,
           roomToLeave: data.roomJoined,
@@ -130,7 +154,6 @@ $(document).ready(function () {
       );
       $(`#join${data.roomLeft}`).click((e) => {
         roomleft = e.target.id.substring(4);
-        console.log(roomleft);
         socket.emit("joinRoom", {
           username: localUsername,
           roomToJoin: data.roomLeft,
@@ -141,12 +164,16 @@ $(document).ready(function () {
     }
   });
 
+  //Monitor the user message activity and listen for enter key being pressed
   messageBox.keydown((key) => {
     if (key.keyCode === 13) {
       if (!currentRoomInFocus) {
         alert("Please select a room to chat with.");
       }
-      let chatText = messageBox.val();
+      let chatText = messageBox.val().trim();
+      if (!chatText) {
+        return;
+      }
       key.preventDefault();
       socket.emit("sendMessage", {
         from: localUsername,
@@ -157,6 +184,7 @@ $(document).ready(function () {
     }
   });
 
+  //Update the users being displayed in the ui via array sent from server
   socket.on("updateUser", (user) => {
     userList = user.users.map((online) => {
       return `<div id=${
@@ -180,14 +208,13 @@ $(document).ready(function () {
       $("#privateMessageTo").text(`To: ${toName}`);
       $("#stagingDest").text(sendTo);
       $("#privateMessageModal").modal("show");
-      //socket.emit("privateMessage", {from: localUsername, to: sendTo})
     });
   });
 
+  //Send a specific user a message via pop up dialouge 
   $("#sendPrivateMessage").click(() => {
     let message = $("#privateMessageContent").val();
     let sendTo = $("#stagingDest").text();
-    console.log("SENDINGTO " + sendTo);
     $("#privateMessageContent").val("");
     $("#privateMessageModal").modal("hide");
     socket.emit("privateMessage", {
@@ -197,6 +224,8 @@ $(document).ready(function () {
     });
   });
 
+  //Private messages are displayed as temporary toasts
+  //Every 5 seconds we want to clean them up so we do not get an infinite list of them
   let cleaner = null;
   socket.on("privateMessage", (data) => {
     $("#theToasts").prepend(`
@@ -229,6 +258,7 @@ $(document).ready(function () {
     $(".toast").toast("show");
   });
 
+  //Similar to users, we update the UI state of the online rooms
   socket.on("updateRooms", (rooms) => {
     roomList = rooms.all.map((room) => {
       return `<div id=room${
@@ -271,7 +301,7 @@ $(document).ready(function () {
       $(`#chatWindow${room}`).remove();
       $(`#tab${room}`).remove();
       socket.emit("deleteRoom", { roomOwner: room, roomToDelete: room });
-      $('#createRoom').prop("disabled", false)
+      $("#createRoom").prop("disabled", false);
     });
     $(`[id^=leave]`).click((e) => {
       roomleft = e.target.id.substring(5);
@@ -293,16 +323,14 @@ $(document).ready(function () {
   });
 
   socket.on("removeRoom", (room) => {
+    if (currentRoomInFocus === room.roomName) {
+      currentRoomInFocus = null;
+    }
     $(`#room${room.roomId}`).remove();
     if (room.roomName) {
       $(`#tab${room.roomName}`).remove();
       $(`#chatWindow${room.roomName}`).remove();
     }
-  });
-
-  socket.on("whoAmI", (data) => {
-    console.log(data.name);
-    $(`#name${data.name}`).append(" (me)");
   });
 
   socket.on("requestMemberResponse", (data) => {
@@ -336,6 +364,8 @@ $(document).ready(function () {
     $("#membersModal").modal("show");
   });
 
+  //We focus on the room being messages and append it's html,
+  //Whether it is currently being viewed or not we don't know/care
   socket.on("roomMessage", (data) => {
     let chatWindowToUpdate = $(`#chatWindow${data.roomToMessage}`);
     if (data.sid === socket.id) {
@@ -355,9 +385,6 @@ $(document).ready(function () {
           </div>
       `);
     }
-    //chatWindowToUpdate.animate({ scrollTop: chatWindowToUpdate.prop("scrollHeight")}, 1000);
     $(`#chatBox`).scrollTop($(`#chatBox`)[0].scrollHeight);
-
-    console.log(data.message);
   });
 });
